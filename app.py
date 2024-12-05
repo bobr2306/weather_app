@@ -16,13 +16,15 @@ def get_weather(city):
     return r
 
 def parse_weather_response(json_data):
+    print(json_data)
     result = {
-        'Temp': json_data['main']['temp'],
-        'Humidity': json_data['main']['humidity'],
+        'temp': json_data['main']['temp'],
+        'humidity': json_data['main']['humidity'],
+        'pressure': json_data['main']['pressure'],
         'W_speed': json_data['wind']['speed'],
-        'Desc' : json_data['weather']['description'],
-        'weather_id' :json_data['weather']['id'],
-        'pic_id' : json_data['weather']['icon']
+        'Desc' : json_data['weather'][0]['description'],
+        'weather_id' : json_data['weather'][0]['id'],
+        'pic_id' : json_data['weather'][0]['icon']
     }
     return result
 
@@ -44,11 +46,26 @@ def base():
         if weatherA and weatherB:
             resultA = parse_weather_response(weatherA.json())
             resultB = parse_weather_response(weatherB.json())
-            weather = {'cityA': resultA, 'cityB': resultB}
+            weather = {
+                'cityA': cityA,
+                'cityB': cityB,
+                'weather_descriptionA': resultA['Desc'],
+                'weather_descriptionB': resultB['Desc'],
+                'tempA': resultA['temp'],
+                'tempB': resultB['temp'],
+                'wind_speedA': resultA['W_speed'],
+                'wind_speedB': resultB['W_speed'],
+                'humidityA': resultA['humidity'],
+                'humidityB': resultB['humidity'],
+                'pressureA': resultA['pressure'],
+                'pressureB': resultB['pressure'],
+                'iconA': resultA['pic_id'],
+                'iconB': resultB['pic_id']
+            }
         else:
             weather = {'error': 'Не удалось получить данные о погоде.'}
     else:
-        return render_template('main.html', weather='sdsdsd')
+        return render_template('main.html', weather=0)
 
     return render_template('main.html', weather=weather)
   
