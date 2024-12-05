@@ -1,7 +1,10 @@
 from flask import *
 import requests
-
+import os 
+from flask import send_from_directory    
+ 
 app = Flask(__name__)
+
 
 def get_weather(city):
     api_key = 'eceebf763209c2eaea7c4c70a47ef6bb'
@@ -13,10 +16,11 @@ def get_weather(city):
         'lang': 'ru'
     }
     r = requests.get(base_url, params=params)
+    if r.status_code == 404:
+        return None
     return r
 
 def parse_weather_response(json_data):
-    print(json_data)
     result = {
         'temp': json_data['main']['temp'],
         'humidity': json_data['main']['humidity'],
@@ -30,11 +34,16 @@ def parse_weather_response(json_data):
 
 def check_weather(result):
     id = result['weather_id']
-    if id in list(range(200, 233)) or True:
-        pass
+    if id in list(range(200, 233)) or id in list(range(502, 532)) or id in list(range(602, 623)) or id in list(range(701, 782)):
+        return "Плохая погода"
+    elif id == 800:
+        return "Отличная погода"
+    elif id in list(range(300, 322)) or id in list(range(500, 502)) or id in list(range(600, 602)):
+        return "Средняя погода"
+    else:
+        return "Нормальная погода"
 
-def parse_pic(id):
-    pass
+
 @app.route('/', methods=['GET'])
 def base():
     cityA = request.args.get('departureCity')
@@ -60,7 +69,9 @@ def base():
                 'pressureA': resultA['pressure'],
                 'pressureB': resultB['pressure'],
                 'iconA': resultA['pic_id'],
-                'iconB': resultB['pic_id']
+                'iconB': resultB['pic_id'],
+                'detailed_descriptionA': check_weather(resultA),
+                'detailed_descriptionB': check_weather(resultB)
             }
         else:
             weather = {'error': 'Не удалось получить данные о погоде.'}
